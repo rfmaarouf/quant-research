@@ -55,16 +55,49 @@ I am not assuming that this will be true in every period. Part of the point of t
 7. Interpret the results instead of only dumping numbers into a table.
 8. Write down limitations, mistakes, and things I would change in a more rigorous version.
 
+## First Session Progress
+
+The first working version now:
+
+- pulls adjusted market data with `yfinance`
+- isolates closing prices
+- calculates daily returns
+- compounds cumulative returns
+- calculates first-pass annualized return and volatility
+- calculates maximum drawdown
+- calculates a first-pass Sharpe ratio using a 0% risk-free rate
+- builds the daily-return correlation matrix
+- creates cumulative-return and drawdown charts
+- saves the generated tables and charts locally
+
+The main goal right now is still understanding what every line is doing. I do not want this project to turn into code that works but that I cannot explain.
+
+## Early Observations
+
+The first run already gave me a few things to investigate further:
+
+- QQQ had the highest first-pass annualized return of the five ETFs but also relatively high volatility and a large drawdown.
+- SPY produced strong returns with lower volatility and a smaller drawdown than QQQ.
+- IWM lagged SPY and QQQ over the period while still showing relatively high volatility.
+- GLD behaved much more independently from the equity ETFs and had strong performance over the selected window.
+- TLT was the weakest performer in this sample and experienced the deepest drawdown.
+- SPY and QQQ had a very high daily-return correlation, while TLT and GLD had much lower correlations with the equity ETFs.
+
+These are observations from one selected historical window, not conclusions about what these assets will do in the future.
+
 ## Visualizations
 
-Planned charts include:
+Current charts:
 
-- Growth of $1
 - Cumulative return comparison
 - Drawdown curves
+
+Still planned:
+
+- Growth of $1
 - Rolling volatility
 - Rolling returns
-- Correlation matrix
+- Correlation visualization
 
 I may add more if they help answer the research question, but I do not want charts just for the sake of having charts.
 
@@ -78,13 +111,15 @@ So this project is basically the foundation. I want to understand the numbers we
 
 This is an introductory research project, so there are going to be limitations. Historical results do not tell me what will happen next, the chosen time period can change the conclusions, Sharpe ratios depend on assumptions, correlations are not constant, and ETFs are only proxies for the exposures I am trying to study.
 
+The current annualized-return calculation is also a simple first-pass approximation based on average daily return times 252. I plan to replace or supplement this with a compounded annual growth calculation as the project gets more rigorous.
+
 Those limitations are part of the analysis rather than something to hide at the end.
 
 ## Status
 
-**In progress.**
+**In progress — first analysis pipeline working.**
 
-Starting with data collection and return calculations.
+Next up: make sure I can explain the current code, then add rolling returns, rolling volatility, beta, and cleaner visualizations.
 
 ## Possible Extensions
 
