@@ -17,8 +17,9 @@ close_prices.to_csv("data/close_prices.csv")
 daily_returns = close_prices.pct_change()
 daily_returns.to_csv("data/daily_returns.csv")
 
-# Cumulative returns
+# Cumulative returns and growth of $1
 cumulative_returns = (1 + daily_returns).cumprod() - 1
+growth_of_one = (1 + daily_returns).cumprod()
 
 # Summary statistics
 average_daily_return = daily_returns.mean()
@@ -28,22 +29,28 @@ daily_volatility = daily_returns.std()
 annualized_return = average_daily_return * 252
 annualized_volatility = daily_volatility * (252 ** 0.5)
 
+# Compounded annual growth rate (CAGR)
+years = (close_prices.index[-1] - close_prices.index[0]).days / 365.25
+cagr = (close_prices.iloc[-1] / close_prices.iloc[0]) ** (1 / years) - 1
+
 # Maximum drawdown
 growth = (1 + daily_returns).cumprod()
 running_max = growth.cummax()
 drawdown = growth / running_max - 1
 max_drawdown = drawdown.min()
 
-# Save outputs
+# Save core outputs
 cumulative_returns.to_csv("data/cumulative_returns.csv")
+growth_of_one.to_csv("data/growth_of_one.csv")
 
 summary = pd.DataFrame({
     "Annualized Return": annualized_return,
+    "CAGR": cagr,
     "Annualized Volatility": annualized_volatility,
     "Max Drawdown": max_drawdown
 })
 
-# Sharpe ratio (using 0% risk-free rate for now)
+# Sharpe ratio (using 0% risk-free rate for this introductory project)
 sharpe_ratio = annualized_return / annualized_volatility
 summary["Sharpe Ratio"] = sharpe_ratio
 
@@ -57,7 +64,7 @@ summary["Downside Volatility"] = downside_volatility
 summary["Sortino Ratio"] = sortino_ratio
 
 # Calmar ratio
-calmar_ratio = annualized_return / max_drawdown.abs()
+calmar_ratio = cagr / max_drawdown.abs()
 summary["Calmar Ratio"] = calmar_ratio
 
 # 95% Historical Value at Risk
@@ -103,6 +110,16 @@ plt.tight_layout()
 plt.savefig("data/cumulative_returns.png")
 plt.close()
 
+# Growth of $1 chart
+growth_of_one.plot(figsize=(10, 6))
+plt.title("Growth of $1")
+plt.ylabel("Portfolio Value ($)")
+plt.xlabel("Date")
+plt.grid(True)
+plt.tight_layout()
+plt.savefig("data/growth_of_one.png")
+plt.close()
+
 # Drawdown chart
 drawdown.to_csv("data/drawdowns.csv")
 drawdown.plot(figsize=(10, 6))
@@ -124,6 +141,34 @@ plt.xlabel("Date")
 plt.grid(True)
 plt.tight_layout()
 plt.savefig("data/rolling_volatility_30d.png")
+plt.close()
+
+# 60-day rolling compounded returns
+rolling_returns = (1 + daily_returns).rolling(window=60).apply(
+    lambda x: x.prod() - 1,
+    raw=True
+)
+rolling_returns.to_csv("data/rolling_returns_60d.csv")
+rolling_returns.plot(figsize=(10, 6))
+plt.title("60-Day Rolling Returns")
+plt.ylabel("60-Day Return")
+plt.xlabel("Date")
+plt.grid(True)
+plt.tight_layout()
+plt.savefig("data/rolling_returns_60d.png")
+plt.close()
+
+# Correlation matrix visualization
+fig, ax = plt.subplots(figsize=(8, 6))
+correlation_image = ax.imshow(correlation_matrix, vmin=-1, vmax=1)
+ax.set_xticks(range(len(correlation_matrix.columns)))
+ax.set_xticklabels(correlation_matrix.columns)
+ax.set_yticks(range(len(correlation_matrix.index)))
+ax.set_yticklabels(correlation_matrix.index)
+ax.set_title("Daily Return Correlation Matrix")
+fig.colorbar(correlation_image, ax=ax, label="Correlation")
+plt.tight_layout()
+plt.savefig("data/correlation_matrix.png")
 plt.close()
 
 # 60-day rolling correlation with SPY
