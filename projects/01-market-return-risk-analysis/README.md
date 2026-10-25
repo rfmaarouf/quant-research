@@ -1,18 +1,18 @@
 # Project 01 — Market Return & Risk Analysis
 
-This is the first actual project in my quant research repo. I am keeping it pretty fundamental on purpose: before trying to build trading strategies or more complicated models, I want to be able to look at a group of assets and understand what their returns and risk are actually telling me.
+This is the first completed project in my quant research repo. I kept it fundamental on purpose: before building trading strategies or more complicated models, I wanted to be able to look at a group of assets and understand what their returns and risk are actually telling me.
 
-The goal is not just to make a few charts and call it quantitative research. I want to go from a question, to the data, to the math/statistics, and then explain what I found and what I still cannot conclude from it.
+The goal was not just to make charts. I wanted to go from a research question, to data, to the math/statistics, and then explain what I found and what I still cannot conclude from it.
 
 ## Research Question
 
 How do the return and risk characteristics of major liquid ETFs differ across market exposures and asset classes?
 
-More specifically, I want to see which assets produced the strongest returns, which took the most risk to get there, how bad their drawdowns became, and how differently they behaved from one another over the same period.
+More specifically, I wanted to compare which assets produced the strongest returns, which took the most risk to get there, how severe their drawdowns became, and how differently they behaved over the same historical period.
 
 ## Assets
 
-I am starting with five liquid ETFs that give me a few different exposures without making the first project unnecessarily huge:
+The project compares five liquid ETFs from 2021-01-01 through 2026-10-21:
 
 - **SPY** — S&P 500 / broad U.S. large-cap equities
 - **QQQ** — Nasdaq-100 / growth and technology-heavy equities
@@ -20,114 +20,107 @@ I am starting with five liquid ETFs that give me a few different exposures witho
 - **TLT** — long-duration U.S. Treasury bonds
 - **GLD** — gold
 
-This gives me three different equity exposures plus bonds and gold, which should make the comparison more interesting than only looking at stocks that tend to move together.
+This gives the project three equity exposures plus bonds and gold rather than only comparing highly similar stock portfolios.
 
-## What I Want to Measure
+## Metrics Implemented
 
-The first version of the project will focus on:
+The final analysis pipeline calculates:
 
 - Daily returns
 - Cumulative returns
-- Average and annualized returns
-- Volatility
-- Sharpe ratio
+- Growth of $1
+- Average daily return
+- Annualized arithmetic return
+- Compound annual growth rate (CAGR)
+- Annualized volatility
 - Maximum drawdown
-- Correlation
-- Beta
-- Rolling returns and rolling volatility
+- Sharpe ratio
+- Downside volatility
+- Sortino ratio
+- Calmar ratio
+- 95% historical Value at Risk (VaR)
+- 95% Conditional Value at Risk / Expected Shortfall (CVaR)
+- Correlation matrix
+- Beta relative to SPY
+- 30-day rolling annualized volatility
+- 60-day rolling compounded returns
+- 60-day rolling correlation with SPY
+- 60-day rolling beta relative to SPY
 
-I am also going to keep notes on what each metric actually means instead of treating the formulas like black boxes.
-
-## Initial Hypothesis
-
-Before looking at the results, I expect QQQ to have higher returns but also higher volatility than SPY, IWM to behave differently because of its small-cap exposure, and TLT and GLD to have lower correlations with the equity ETFs.
-
-I am not assuming that this will be true in every period. Part of the point of the project is to see where the data agrees with that intuition and where it does not.
+The script also exports the main tables, time series, and charts to the local `data/` directory.
 
 ## Method
 
-1. Pull historical adjusted price data for each ETF.
-2. Clean and align the data so every asset is being compared over the same dates.
-3. Calculate daily percentage returns.
-4. Build the main return and risk metrics in Python.
-5. Compare the assets with summary statistics and visualizations.
-6. Look at correlations and how the relationships change through time.
-7. Interpret the results instead of only dumping numbers into a table.
-8. Write down limitations, mistakes, and things I would change in a more rigorous version.
+1. Pull adjusted historical price data with `yfinance`.
+2. Align closing-price observations across all five ETFs.
+3. Convert prices into daily percentage returns.
+4. Compound daily returns into cumulative wealth paths.
+5. Calculate return, volatility, downside-risk, drawdown, tail-risk, correlation, and beta metrics.
+6. Calculate rolling statistics to show that risk relationships change through time.
+7. Save the resulting data and visualizations locally.
+8. Interpret the results while keeping the limitations of the sample in view.
 
-## First Session Progress
+## Main Findings
 
-The first working version now:
+The selected historical window produced several useful observations:
 
-- pulls adjusted market data with `yfinance`
-- isolates closing prices
-- calculates daily returns
-- compounds cumulative returns
-- calculates first-pass annualized return and volatility
-- calculates maximum drawdown
-- calculates a first-pass Sharpe ratio using a 0% risk-free rate
-- builds the daily-return correlation matrix
-- creates cumulative-return and drawdown charts
-- saves the generated tables and charts locally
+- **QQQ** generated the strongest first-pass annualized return among the equity ETFs, but it also carried relatively high volatility, drawdown risk, and market sensitivity.
+- **SPY** produced strong returns with lower volatility and drawdown than QQQ, making its return/risk tradeoff more balanced during this sample.
+- **IWM** lagged SPY and QQQ while still experiencing substantial volatility, illustrating that higher risk does not automatically produce higher realized return.
+- **GLD** behaved more independently from the equity ETFs and provided an example of how a lower-correlation asset can change the risk characteristics of a multi-asset portfolio.
+- **TLT** was the weakest performer in the selected sample and experienced a severe drawdown, showing that Treasury exposure is not automatically low-risk when duration and interest-rate risk are large.
+- **SPY and QQQ** had very high daily-return correlation, while GLD and TLT generally behaved more independently from equities.
+- Rolling correlation and rolling beta showed that these relationships were not constant. Market sensitivity can strengthen or weaken substantially depending on the period being measured.
 
-The main goal right now is still understanding what every line is doing. I do not want this project to turn into code that works but that I cannot explain.
-
-## Early Observations
-
-The first run already gave me a few things to investigate further:
-
-- QQQ had the highest first-pass annualized return of the five ETFs but also relatively high volatility and a large drawdown.
-- SPY produced strong returns with lower volatility and a smaller drawdown than QQQ.
-- IWM lagged SPY and QQQ over the period while still showing relatively high volatility.
-- GLD behaved much more independently from the equity ETFs and had strong performance over the selected window.
-- TLT was the weakest performer in this sample and experienced the deepest drawdown.
-- SPY and QQQ had a very high daily-return correlation, while TLT and GLD had much lower correlations with the equity ETFs.
-
-These are observations from one selected historical window, not conclusions about what these assets will do in the future.
+These are observations from one selected historical window, not forecasts about future returns.
 
 ## Visualizations
 
-Current charts:
+The project now produces:
 
 - Cumulative return comparison
-- Drawdown curves
-
-Still planned:
-
 - Growth of $1
-- Rolling volatility
-- Rolling returns
-- Correlation visualization
+- Drawdown curves
+- 30-day rolling annualized volatility
+- 60-day rolling compounded returns
+- Daily-return correlation matrix
+- 60-day rolling correlation with SPY
+- 60-day rolling beta relative to SPY
 
-I may add more if they help answer the research question, but I do not want charts just for the sake of having charts.
+## What I Learned
 
-## Why I Am Starting Here
+The biggest lesson from this project is that no single metric describes risk well.
 
-A lot of the projects I eventually want to work on — factor models, portfolio optimization, statistical arbitrage, volatility models, options, and systematic strategies — depend on understanding returns, volatility, correlation, and drawdowns first.
+Volatility measures the dispersion of returns, while drawdown measures how far an investment fell from a previous peak. Beta measures sensitivity to a benchmark rather than total risk. Correlation describes how assets move together, but rolling correlation shows that this relationship can change. VaR gives a loss threshold, while CVaR looks deeper into the tail and estimates the average loss once that threshold has already been breached.
 
-So this project is basically the foundation. I want to understand the numbers well enough that later projects are built on something I actually understand rather than code I copied without knowing what it means.
+I also learned why compounded returns matter. Adding daily percentage returns does not correctly represent the growth of capital through time, so cumulative returns and rolling multi-day returns need to be compounded.
 
-## Limitations to Keep in Mind
+Finally, CAGR and the arithmetic annualized-return estimate answer slightly different questions. The arithmetic estimate annualizes the average daily return, while CAGR describes the constant compounded yearly growth rate that connects the starting value to the ending value.
 
-This is an introductory research project, so there are going to be limitations. Historical results do not tell me what will happen next, the chosen time period can change the conclusions, Sharpe ratios depend on assumptions, correlations are not constant, and ETFs are only proxies for the exposures I am trying to study.
+## Limitations
 
-The current annualized-return calculation is also a simple first-pass approximation based on average daily return times 252. I plan to replace or supplement this with a compounded annual growth calculation as the project gets more rigorous.
+This remains an introductory research project and has important limitations:
 
-Those limitations are part of the analysis rather than something to hide at the end.
+- Historical results do not predict future performance.
+- The selected start and end dates can materially change the conclusions.
+- The Sharpe and Sortino calculations use a 0% risk-free rate for simplicity.
+- Arithmetic annualized return is only an approximation and can differ meaningfully from CAGR.
+- Historical VaR and CVaR depend entirely on the observed sample and do not guarantee the size of future losses.
+- Beta and correlation are benchmark- and window-dependent.
+- Correlations can rise during periods of market stress, reducing diversification when it is needed most.
+- ETFs are proxies for broader asset-class exposures and contain their own structural characteristics.
+- Transaction costs, taxes, liquidity constraints, and portfolio weights are outside the scope of this project.
+
+These limitations are part of the analysis rather than something to hide.
 
 ## Status
 
-**In progress — first analysis pipeline working.**
+**Complete — Project 01 core analysis finished.**
 
-Next up: make sure I can explain the current code, then add rolling returns, rolling volatility, beta, and cleaner visualizations.
+The final pipeline now covers return, volatility, drawdown, downside risk, tail risk, correlation, beta, CAGR, and rolling risk analysis with exported tables and visualizations.
 
-## Possible Extensions
+## Next Project
 
-Once the base analysis works, I may extend it by:
+The natural next step is **Project 02 — Portfolio Optimization & Efficient Frontier**.
 
-- Comparing different market regimes
-- Adding a risk-free rate to the Sharpe calculation
-- Comparing rolling beta and correlation
-- Testing sector ETFs
-- Separating bull, bear, and high-volatility periods
-- Using the results as a bridge into the portfolio optimization and factor-model projects
+That project can build directly on the return, volatility, covariance, and correlation concepts from this one to study portfolio weights, expected portfolio return, portfolio volatility, diversification, Sharpe-maximizing portfolios, minimum-variance portfolios, and the efficient frontier.
