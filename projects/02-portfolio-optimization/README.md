@@ -1,18 +1,14 @@
 # Project 02 — Portfolio Optimization & Efficient Frontier
 
-Project 01 was about understanding the return and risk of individual assets. This project is the next step: instead of asking whether one asset is risky or profitable by itself, I want to understand what happens when I combine multiple assets into one portfolio.
+Project 01 was about understanding the return and risk of individual assets. This project is the next step: instead of looking at one asset by itself, I wanted to understand what happens when I combine multiple assets into one portfolio.
 
-The main thing I want to learn here is how portfolio weights, covariance, and diversification actually change total portfolio risk. I also want to see why the portfolio with the highest expected return is not automatically the best portfolio, and how optimization can be used to search for better return/risk combinations.
+The main goal was to see how portfolio weights, covariance, and diversification change total portfolio risk, and how optimization can find better return/risk combinations than a simple equal-weight portfolio.
 
 ## Research Question
 
 How does changing the allocation between SPY, QQQ, IWM, TLT, and GLD affect a portfolio's expected return, volatility, diversification, and risk-adjusted performance?
 
-More specifically, I want to find out whether combining assets that behave differently can reduce total portfolio risk without giving up too much expected return, and how an optimized portfolio compares with a simple equal-weight portfolio.
-
 ## Assets
-
-I am keeping the same five ETFs from Project 01 so I can build directly on what I already learned:
 
 - **SPY** — S&P 500 / broad U.S. large-cap equities
 - **QQQ** — Nasdaq-100 / growth and technology-heavy equities
@@ -20,24 +16,25 @@ I am keeping the same five ETFs from Project 01 so I can build directly on what 
 - **TLT** — long-duration U.S. Treasury bonds
 - **GLD** — gold
 
-Using the same assets also makes it easier to connect this project back to the volatility, beta, drawdown, and correlation work from Project 01.
+## Methodology
 
-## What I Want to Measure
+I started with an equal-weight portfolio where each asset had a 20% allocation. This gave me a baseline that I could compare the optimized portfolios against.
 
-The first version of the project will focus on:
+I then generated 5,000 random portfolios using Monte Carlo simulation. Each portfolio had different weights, and I calculated its expected return, volatility, and Sharpe ratio.
 
-- Expected annual portfolio return
-- Portfolio volatility
-- Covariance matrix
-- Portfolio weights
-- Equal-weight portfolio
-- Random portfolio simulation
-- Sharpe ratio
-- Minimum-volatility portfolio
-- Maximum-Sharpe portfolio
-- Efficient frontier
-- Diversification effects
-- Risk contribution by asset
+From those portfolios, I found:
+
+- The portfolio with the highest Sharpe ratio
+- The portfolio with the lowest volatility
+
+After that, I used SciPy's SLSQP optimizer to find more precise solutions instead of relying only on random simulations.
+
+The optimizer follows two main rules:
+
+- All portfolio weights must add up to 100%
+- Each asset weight must stay between 0% and 100%
+
+Finally, I plotted the simulated portfolios and compared the Monte Carlo results with the portfolios found by the optimizer.
 
 ## Core Math
 
@@ -67,48 +64,69 @@ where:
 
 The important idea is that portfolio risk does not come from just adding each asset's volatility. The way the assets move together matters too.
 
-## Initial Hypothesis
+## Portfolio Metrics
 
-I expect the equity-heavy portfolios to have higher expected returns but also higher volatility. I also expect TLT and GLD to reduce portfolio risk because they have historically behaved differently from SPY, QQQ, and IWM during at least some periods.
+### Expected Return
 
-I also expect the minimum-volatility portfolio to put more weight into lower-correlation assets, while the maximum-Sharpe portfolio will probably take more equity exposure if the extra return is enough to justify the extra risk.
+Expected portfolio return is calculated using the asset weights and their annualized historical returns.
 
-I am not assuming the optimized portfolio will stay optimal outside this sample. A big part of this project is understanding that optimization depends heavily on the return and covariance estimates used as inputs.
+### Volatility
 
-## Plan
+Volatility measures the portfolio's risk. The calculation uses the covariance matrix, so it takes into account how the assets move relative to each other.
 
-1. Load historical price data for the five ETFs.
-2. Calculate daily returns.
-3. Estimate annualized expected returns.
-4. Build the annualized covariance matrix.
-5. Create an equal-weight portfolio as a baseline.
-6. Calculate portfolio return and volatility from a set of weights.
-7. Generate thousands of random portfolios.
-8. Compare their expected return, volatility, and Sharpe ratios.
-9. Identify the minimum-volatility portfolio.
-10. Identify the maximum-Sharpe portfolio.
-11. Plot the efficient frontier.
-12. Measure how much risk each asset contributes to the optimized portfolio.
-13. Compare the optimized portfolios with the equal-weight portfolio.
-14. Write down what the optimization can and cannot tell me.
+### Sharpe Ratio
 
-## Things I Want to Understand, Not Just Code
+The Sharpe ratio compares return to volatility. A higher Sharpe ratio means the portfolio produced more return relative to the amount of risk it took.
 
-By the end of this project I should be able to explain:
+For this project I used:
 
-- Why covariance matters for portfolio risk
-- Why two individually risky assets can sometimes reduce total portfolio risk when combined
-- Why portfolio weights have to sum to 1
-- How expected portfolio return is calculated
-- How portfolio volatility is calculated
-- What the efficient frontier actually represents
-- What makes a portfolio minimum variance
-- What makes a portfolio maximum Sharpe
-- Why optimization can become unstable when expected-return estimates change
-- Why an optimized historical portfolio is not automatically the best future portfolio
+`Sharpe Ratio = Portfolio Return / Portfolio Volatility`
+
+I did not include a risk-free rate in the current version.
+
+## Results
+
+Using historical data from 2021 through October 2026, the equal-weight portfolio produced an expected annual return of about 9.99% with 13.52% volatility and a Sharpe ratio of 0.74.
+
+The optimized maximum Sharpe portfolio improved the expected return to about 14.97% while slightly lowering volatility to 13.27%. This resulted in a Sharpe ratio of about 1.13.
+
+The optimizer allocated approximately:
+
+- SPY: 58.6%
+- GLD: 41.4%
+- QQQ: 0%
+- IWM: 0%
+- TLT: 0%
+
+The minimum volatility portfolio lowered expected volatility to about 10.89%, but this came with a lower expected return of about 5.78%.
+
+The results show the tradeoff between maximizing risk-adjusted returns and minimizing overall portfolio risk.
+
+## Visualization
+
+The graph shows the 5,000 randomly generated portfolios. Each point represents a different combination of asset weights.
+
+The x-axis represents volatility and the y-axis represents expected return. The graph also highlights:
+
+- Monte Carlo maximum Sharpe portfolio
+- Monte Carlo minimum volatility portfolio
+- True optimized maximum Sharpe portfolio
+- True optimized minimum volatility portfolio
+
+This makes it easy to see the tradeoff between taking more risk and targeting a higher expected return.
+
+## What I Learned
+
+This project helped me understand that portfolio optimization is not just about picking the assets with the highest returns.
+
+The covariance between assets matters because combining assets that behave differently can reduce the total risk of the portfolio.
+
+I also learned the difference between using Monte Carlo simulation to search through thousands of possible portfolios and using an optimizer to directly search for the best solution under specific constraints.
+
+The optimized historical portfolio is also not automatically the best future portfolio. The result depends heavily on the historical return and covariance estimates used as inputs.
 
 ## Status
 
-**In progress — project setup started.**
+**Complete.**
 
-Next up: build the return and covariance inputs, then create the equal-weight portfolio before doing any optimization.
+The project now includes an equal-weight baseline, Monte Carlo simulation, maximum-Sharpe and minimum-volatility optimization, visualization, portfolio comparison, and CSV export.
