@@ -1,13 +1,13 @@
 ,0
 Initial Capital,10000.0
-Final Equity,16321.21
-Total Return,0.632121
-Annualized Return,0.0884
-Annualized Volatility,0.1075
-Sharpe Ratio (rf=0),0.841
-Sortino Ratio (target=0),1.324
-Maximum Drawdown,-0.1045
-Benchmark Return,1.2365
-Buy Signals,29
-Sell Signals,29
-Time in Market,0.1790
+Final Equity,16321.214312316457
+Total Return,0.6321214312316457
+Annualized Return,0.08835864535124593
+Annualized Volatility,0.10746177858025059
+Sharpe Ratio (rf=0),0.841324396529703
+Sortino Ratio (target=0),1.3236224481795098
+Maximum Drawdown,-0.10446787478033748
+Benchmark Return,1.2364906130340105
+Buy Signals,29.0
+Sell Signals,29.0
+Time in Market,0.17901234567901234
